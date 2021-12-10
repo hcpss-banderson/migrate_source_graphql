@@ -1,0 +1,3 @@
+services:
+  migrate_source_graphql.graphql.client:
+    class: Drupal\migrate_source_graphql\GraphQL\Client

@@ -1,0 +1,22 @@
+{
+    "name": "drupal/migrate_source_graphql",
+    "description": "GraphQL source migration module",
+    "type": "drupal-module",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Nino Marrazzo (reinchek)",
+            "homepage": "https://www.drupal.org/u/reinchek",
+            "role": "Maintainer"
+        }
+    ],
+    "homepage": "https://drupal.org/project/migrate_source_graphql",
+    "support": {
+        "issues": "https://drupal.org/project/issues/migrate_source_graphql",
+        "source": "https://git.drupalcode.org/project/migrate_source_graphql"
+    },
+    "require": {
+        "gmostafa/php-graphql-client": "1.8",
+	"drupal/migrate_plus": "5"
+    }
+}
