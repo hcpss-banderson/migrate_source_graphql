@@ -39,17 +39,16 @@ class GraphQL extends SourcePluginBase implements ConfigurableInterface {
       throw new \InvalidArgumentException('You must declare the "endpoint" to the GraphQL API service in your settings.');
     }
 
-    // JWT Token is required, for now.
-    // if (empty($this->configuration['jwt_token'])) {
-    //  throw new \InvalidArgumentException('You must declare the "jwt_token" to connect to the GraphQL API service in your settings.');
-    // }
-
     // Queries are required.
     if (empty($this->configuration['query'])) {
-      throw new \InvalidArgumentException('You must declare the "query" parameter  in your settings to get expected data from GraphQL API service.');
+      throw new \InvalidArgumentException('You must declare the "query" parameter in your settings to get expected data from GraphQL API service.');
     }
     else {
-      $this->client = new Client($this->configuration['endpoint'], ['Authorization' => 'Bearer ' . $this->configuration['jwt_token']]);
+      $headers = [];
+      if (isset($this->configuration['auth_scheme']) && !empty($this->configuration['auth_scheme'])) {
+        $headers['Authorization'] = $this->configuration['auth_scheme'] . ' ' . ($this->configuration['auth_parameters'] ?? '');
+      }
+      $this->client = new Client($this->configuration['endpoint'], $headers);
       $this->fields();
     }
   }
