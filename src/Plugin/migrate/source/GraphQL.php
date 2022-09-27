@@ -31,9 +31,9 @@ class GraphQL extends SourcePluginBase implements ConfigurableInterface {
    * @throws \Drupal\migrate\MigrateException
    */
   public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration) {
-    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration);
-    $this->setConfiguration($configuration);
+    $configuration['data_key'] = isset($configuration['data_key']) ? $configuration['data_key'] : 'data';
 
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration);
     // Endpoint is required.
     if (empty($this->configuration['endpoint'])) {
       throw new \InvalidArgumentException('You must declare the "endpoint" to the GraphQL API service in your settings.');
@@ -108,9 +108,8 @@ class GraphQL extends SourcePluginBase implements ConfigurableInterface {
     $query = $this->buildQuery($queryName, $query[$queryName]);
     $results  = $this->client->runQuery($query);
     $results  = $results->getData();
-    $property = array_keys((array)$results->$queryName);
-    $property = $property[0];
-    $results = !empty($results->$queryName) ? $results->$queryName->$property : [];
+    $property = $this->configuration['data_key'];
+    $results = $results->$queryName->$property ?? $results->$queryName ?? [];
     foreach ($results as $result) {
       yield json_decode(json_encode($result), TRUE);
       ;
@@ -148,17 +147,20 @@ class GraphQL extends SourcePluginBase implements ConfigurableInterface {
     $fields = [];
     $query = $this->configuration['query'];
     foreach ($query as $queryName => $query) {
-      $results = array_keys($query['fields'][0]);
+      $results = is_array($query['fields'][0]) ? array_keys($query['fields'][0]) : $query['fields'];
       foreach ($results as $resultKey) {
-        foreach ($query['fields'][0][$resultKey] as $field) {
-          if (!is_array($field)) {
-            $fields[$field] = $field;
+        if (isset($query['fields'][0][$resultKey])) {
+          foreach ($query['fields'][0][$resultKey] as $field) {
+            if (!is_array($field)) {
+              $fields[$field] = $field;
+            }
           }
+        }
+        else {
+          $fields[$resultKey] = $resultKey;
         }
       }
     }
-
     return $fields;
   }
-
 }
