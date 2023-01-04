@@ -7,10 +7,74 @@ This means that like as _[Migrate Source CSV](https://www.drupal.org/project/mig
 
 How it works?
 -------------
+### Source options
+The **graphql** _source_ offers a number of options to allow you to best configure your query. In short:
+```
+source:
+  plugin: graphql
+
+  # [mandatory] The GraphQL endpoint
+  endpoint: <value>
+  # [optional] Basic, Bearer, Digest, etc...
+  auth_scheme: <value>
+  # [optional] Pared with auth_scheme will generate the string that
+  # will be passed to the Authorization header
+  auth_parameter: <value>
+  # [optional] Used to specify a different name for "data" property
+  data_key: <value>
+  # [mandatory] from here starts the query definition
+  query:
+    # [mandatory] The query name
+    <query_name>:
+      # [optional] Query arguments (filtering, pagination, and so on...).
+      # See the example below.
+      arguments:
+      # [mandatory] Query fields definition
+      fields:
+        # [mandatory] It is 'data' if no different value has been set in data_key
+        - <data|data_key>:
+            - <field_1>
+            - <field_2>
+            - <field_n>
+```
 
 ### Let's take an example.
 
-For this example we will use the [GraphQLZero](https://graphqlzero.almansi.me/ "Fake Online GraphQL API for Testing and Prototyping") (Fake Online GraphQL API for Testing and Prototyping) from which we will migrate some entities, that on GraphQLZero are called **posts**, into the our Drupal instance populating the our's default articles. Follow GraphQL query shows how to get a list of posts from GraphQLZero: `query { posts { data { id title body } } }` **The response:** ![GraphQL Zero](/files/post-graphql-query_5.png)
+For this example we will use the [GraphQLZero](https://graphqlzero.almansi.me/ "Fake Online GraphQL API for Testing and Prototyping") (Fake Online GraphQL API for Testing and Prototyping) from which we will migrate some entities, that on GraphQLZero are called **posts**, into the our Drupal instance populating the our's default articles. Follow GraphQL query shows how to get a list of posts from GraphQLZero:
+
+```
+query {
+  posts {
+    data {
+      id
+      title
+      body
+    }
+  }
+}
+```
+
+**The response:**
+```
+{
+  "data": {
+    "posts": {
+      "data": [
+        {
+          "id": "1",
+          "title": "sunt aut facere repellat",
+          "body": "quia et suscipit\nsuscipit ..."
+        },
+        ...
+        {
+          "id": "3",
+          "title": "ea molestias",
+          "body": "et iusto sed quo iure\nvoluptatem ..."
+        },
+      }
+    }
+```
+
 
 The migration
 -------------
@@ -23,6 +87,8 @@ migration_tags: null
 source:
   plugin: graphql
   endpoint: 'https://graphqlzero.almansi.me/api'
+  auth_scheme: Bearer
+  auth_parameter: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
   query:
     posts:
       arguments:
