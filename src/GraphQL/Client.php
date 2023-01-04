@@ -69,7 +69,7 @@ class Client {
     if ($arguments !== NULL) {
       $argumentsKey = array_key_first($arguments);
       $argumentsToString = json_encode($arguments[$argumentsKey]);
-      $argumentsToString = preg_replace('/\"(.*)\"\:(.*)$/i', '$1:$2', $argumentsToString);
+      $argumentsToString = preg_replace("/['\"]/", '', $argumentsToString);
 
       $arguments = [
         $argumentsKey => new RawObject($argumentsToString),
