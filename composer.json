@@ -16,6 +16,6 @@
         "source": "https://git.drupalcode.org/project/migrate_source_graphql"
     },
     "require": {
-        "gmostafa/php-graphql-client": "1.8"
+        "gmostafa/php-graphql-client": "^1.8"
     }
 }
