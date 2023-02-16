@@ -7,6 +7,7 @@ use Drupal\migrate\Plugin\migrate\source\SourcePluginBase;
 use Drupal\migrate\Plugin\MigrationInterface;
 use Drupal\Component\Utility\NestedArray;
 use Drupal\migrate_source_graphql\GraphQL\Client;
+use GraphQL\Exception\QueryError;
 
 /**
  * Class GraphQL migrate source.
@@ -106,13 +107,17 @@ class GraphQL extends SourcePluginBase implements ConfigurableInterface {
     $query = $this->configuration['query'];
     $queryName = array_key_first($query);
     $query = $this->buildQuery($queryName, $query[$queryName]);
-    $results  = $this->client->runQuery($query);
-    $results  = $results->getData();
-    $property = $this->configuration['data_key'];
-    $results = $results->$queryName->$property ?? $results->$queryName ?? [];
-    foreach ($results as $result) {
-      yield json_decode(json_encode($result), TRUE);
-      ;
+    try {
+      $results  = $this->client->runQuery($query);
+      $results  = $results->getData();
+      $property = $this->configuration['data_key'];
+      $results = $results->$queryName->$property ?? $results->$queryName ?? [];
+      foreach ($results as $result) {
+        yield json_decode(json_encode($result), TRUE);
+        ;
+      }
+    } catch (QueryError $exception) {
+      \Drupal::messenger()->addError($exception->getMessage());
     }
   }
 

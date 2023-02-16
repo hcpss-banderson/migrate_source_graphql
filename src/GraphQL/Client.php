@@ -3,6 +3,7 @@
 namespace Drupal\migrate_source_graphql\GraphQL;
 
 use GraphQL\Client as GraphQLClient;
+use GraphQL\Exception\QueryError;
 use GraphQL\Query;
 use GraphQL\RawObject;
 use GraphQL\QueryBuilder\QueryBuilderInterface;
@@ -67,13 +68,15 @@ class Client {
       ->setSelectionSet($selectionSet);
 
     if ($arguments !== NULL) {
-      $argumentsKey = array_key_first($arguments);
-      $argumentsToString = json_encode($arguments[$argumentsKey]);
-      $argumentsToString = preg_replace("/['\"]/", '', $argumentsToString);
-
-      $arguments = [
-        $argumentsKey => new RawObject($argumentsToString),
-      ];
+      // Temporally filled with RawObject (filters from migration.yml to string)
+      $argumentsTemp = [];
+      // Iterate over all arguments
+      foreach ($arguments as $argumentsKey => $argument) {
+        $argumentToString = json_encode($argument);
+        $argumentToString = preg_replace('/"([a-zA-Z]+[a-zA-Z0-9_]*)":/','$1:', $argumentToString);
+        $argumentsTemp[$argumentsKey] = new RawObject($argumentToString);
+      }
+      $arguments = $argumentsTemp;
 
       if ($filters !== NULL) {
         $arguments['filters'] = $filters;
